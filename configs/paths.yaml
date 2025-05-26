@@ -5,6 +5,8 @@ coverhunter_checkpoint_dir: "csi_models/checkpoints/CoverHunter/our_model/pt_mod
 
 lyricover_checkpoint_path: "csi_models/checkpoints/lyricover/model.pth"
 
+datonal_checkpoint_path: "csi_models/checkpoints/DaTonal/DaTonalCover.pth"
+
 covers80_data_dir: "datasets/covers80/coversongs/covers32k/"
 covers80but10_data_dir: "datasets/covers80but10/coversongs/covers32k/"
 

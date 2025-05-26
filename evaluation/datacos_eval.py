@@ -10,16 +10,23 @@ from csi_models.ByteCoverModel import ByteCoverModel
 from csi_models.CoverHunterModel import CoverHunterModel
 from csi_models.LyricoverModel import LyricoverModel
 from csi_models.RemoveModel import RemoveModel
+from csi_models.DaTonalModel import DaTonalModel
 from feature_extraction.feature_extraction import MFCCModel, SpectralCentroidModel
 from evaluation.metrics import compute_mean_metrics_for_rankings
 
 
-# === Configuration ===
-DATACOS_CSV_PATH = "./da_tacos_benchmark.csv"
-DATACOS_FEATURE_DIR = "./da-tacos_benchmark_subset_hpcp"  # adjust to match your feature type
+# i used here the absolute path to these files (as in wsl)
+# it should be changed to relative path in a potential fix
+# now i cant do it as im doing the evaluation in the background
+# but i suppose it should be like this:
+# /datasets/datacos/da_tacos_listed.csv
+# /datasets/datacos/npyfolder
+DATACOS_CSV_PATH ="/mnt/d/WimuProj/CoverDetectionHub/datasets/datacos/da_tacos_listed.csv"  
+DATACOS_FEATURE_DIR = "/mnt/d/WimuProj/CoverDetectionHub/datasets/datacos/npyfolder"  
 
 
-# === Load Data ===
+
+
 def gather_datacos_files_from_csv(csv_path: str, feature_dir: str):
     df = pd.read_csv(csv_path)
     files_and_labels = []
@@ -36,7 +43,7 @@ def gather_datacos_files_from_csv(csv_path: str, feature_dir: str):
     return files_and_labels
 
 
-# === Use preloaded features instead of computing embeddings ===
+
 def load_embeddings(files_and_labels, progress=gr.Progress()):
     progress(0, desc="Loading feature embeddings")
     embeddings = {}
@@ -44,13 +51,13 @@ def load_embeddings(files_and_labels, progress=gr.Progress()):
 
     for i, (feat_path, _) in enumerate(tqdm(files_and_labels, desc="Loading features")):
         if feat_path not in embeddings:
-            embeddings[feat_path] = np.load(feat_path)
+            embeddings[feat_path] = np.load(feat_path,allow_pickle=True).item()
         progress((i + 1) / total_files, desc="Loading feature embeddings")
 
     return embeddings
 
 
-# === Ranking logic ===
+# ranking
 def compute_rankings_per_song(files_and_labels, model: ModelBase, progress=gr.Progress()):
     embeddings = load_embeddings(files_and_labels, progress)
     rankings_per_query = []
@@ -86,7 +93,15 @@ def compute_rankings_per_song(files_and_labels, model: ModelBase, progress=gr.Pr
     return rankings_per_query
 
 
-# === Main evaluation function ===
+# "main" eval function
+# I did the evaluation on 1000 files
+# its way less than the max amount of potential files
+# few reasons for that:
+# 1) low disk space - max that i could save were +4000 npy files (no more space on disk D)
+# 2) low disk space II - with +4000 npy files, my disk C was burning as there is the WSL installed
+# and during the ranking it uses its space, for the disk C initially it was breaking at 20%, i could increase that to ~~30%
+# getting the remaining 70% was impossible for me, thats why i reduced the amount of files to just 1000
+# 
 def evaluate_on_datacos(model_name: str, k=10):
     logging.info(f"Evaluating '{model_name}' on Da-TACOS benchmark with k={k}")
     files_and_labels = gather_datacos_files_from_csv(DATACOS_CSV_PATH, DATACOS_FEATURE_DIR)
@@ -97,7 +112,8 @@ def evaluate_on_datacos(model_name: str, k=10):
         "Lyricover": LyricoverModel,
         "MFCC": MFCCModel,
         "Spectral Centroid": SpectralCentroidModel,
-        "Remove": RemoveModel
+        "Remove": RemoveModel,
+        "DaTonal": DaTonalModel
     }
 
     if model_name not in model_mapping:
