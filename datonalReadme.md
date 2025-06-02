@@ -5,7 +5,7 @@ Dataset Incompatibility and Limitations
 
     Incompatible with Existing Models: The DaTacos dataset isn't directly compatible with existing models within the project, such as Lyricover.
     Need for Physical Audio Files: For compatibility, a physical audio file is required. DaTacos, however, only provides extracted features in HDF5 format, not the raw audio.
-    Lack of Song Information: The dataset doesn't provide identifying song information (e.g., "Song X by Artist Y," or a YouTube ID). This prevents models that rely on such metadata or need to process the original audio from working.
+    Lack of Song Information: The dataset doesn't provide identifying song information (YouTube ID or some kind ID which allows downloading). This prevents models that rely on such metadata or need to process the original audio from working.
     Impact on Lyric-Based Models: Because of the lack of raw audio and song metadata, models like Lyricover, which are based on separate tonal and lyrical features (requiring audio for lyric transcription), cannot operate on this dataset.
 
 Attempts to Overcome Limitations
